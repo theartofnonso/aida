@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import AidaMark from "@/components/AidaMark";
+import AidaWordmark from "@/components/AidaWordmark";
 import ChatBubble from "@/components/ChatBubble";
 import IntroScreen from "@/components/IntroScreen";
 import ProgressDots from "@/components/ProgressDots";
@@ -296,12 +296,9 @@ export default function Page() {
             type="button"
             onClick={handleRestart}
             aria-label="Start over"
-            className="flex items-center gap-2 group"
+            className="flex items-center group hover:opacity-80 transition-opacity"
           >
-            <AidaMark size={28} />
-            <span className="font-serif text-[17px] tracking-tight text-ink group-hover:text-accent transition-colors">
-              Aida
-            </span>
+            <AidaWordmark width={68} />
           </button>
           <div className="ml-auto flex items-center gap-3">
             <ProgressDots

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import AidaMark from "./AidaMark";
+import AidaWordmark from "./AidaWordmark";
 import ExecutionPanel from "./ExecutionPanel";
 import ProjectionCard from "./ProjectionCard";
 import type { ResultContent } from "@/lib/decision";
@@ -44,12 +44,7 @@ export default function ResultsScreen({
   return (
     <div className="min-h-screen flex flex-col bg-canvas">
       <header className="safe-top px-5 pt-5 max-w-xl mx-auto w-full">
-        <div className="flex items-center gap-2">
-          <AidaMark size={28} />
-          <span className="font-serif text-[17px] tracking-tight text-ink">
-            Aida
-          </span>
-        </div>
+        <AidaWordmark width={76} />
       </header>
 
       <main className="flex-1 px-5 pt-6 pb-10 max-w-xl mx-auto w-full">

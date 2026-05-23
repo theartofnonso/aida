@@ -1,6 +1,6 @@
 "use client";
 
-import AidaMark from "./AidaMark";
+import AidaWordmark from "./AidaWordmark";
 
 interface IntroScreenProps {
   onStart: () => void;
@@ -10,12 +10,7 @@ export default function IntroScreen({ onStart }: IntroScreenProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="safe-top px-5 pt-5">
-        <div className="flex items-center gap-2">
-          <AidaMark size={32} />
-          <span className="font-serif text-[19px] tracking-tight text-ink">
-            Aida
-          </span>
-        </div>
+        <AidaWordmark width={88} />
       </header>
 
       <main className="flex-1 flex flex-col justify-center px-5 py-10 max-w-xl mx-auto w-full">

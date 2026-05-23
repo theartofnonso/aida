@@ -1,4 +1,4 @@
-import AidaMark from "./AidaMark";
+import AidaWordmark from "./AidaWordmark";
 
 interface ChatBubbleProps {
   from: "aida" | "user";
@@ -9,7 +9,9 @@ export default function ChatBubble({ from, children }: ChatBubbleProps) {
   if (from === "aida") {
     return (
       <div className="flex items-end gap-2 animate-fade-in-up">
-        <AidaMark size={28} />
+        <span className="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-full bg-accent shadow-soft">
+          <AidaWordmark width={52} className="text-white" />
+        </span>
         <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-surface border border-line px-4 py-3 shadow-soft text-[15px] leading-relaxed text-ink">
           {children}
         </div>
