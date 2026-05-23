@@ -217,7 +217,7 @@ export default function Page() {
       const idx = QUESTIONS.findIndex((x) => x.id === q);
       const next = QUESTIONS[idx + 1];
 
-      // Always give the transition message — it's part of the calm pacing.
+      // Always give the transition message, it's part of the conversational pacing.
       await aidaSays(config.transition, 900);
       if (sessionRef.current !== token) return;
 
@@ -229,6 +229,33 @@ export default function Page() {
     },
     [aidaSays, answers, currentQuestion, finishConversation],
   );
+
+  const handleSkipQuestion = useCallback(async () => {
+    const q = currentQuestion;
+    if (!q) return;
+
+    // Acknowledge the skip in the chat without forcing an answer.
+    setCurrentQuestion(null);
+    setMessages((m) => [
+      ...m,
+      { id: uid(), from: "user", text: "I’d rather skip this one." },
+    ]);
+
+    const token = sessionRef.current;
+    await sleep(280);
+    if (sessionRef.current !== token) return;
+
+    await aidaSays("No problem. I’ll work with what we have.", 700);
+    if (sessionRef.current !== token) return;
+
+    const idx = QUESTIONS.findIndex((x) => x.id === q);
+    const next = QUESTIONS[idx + 1];
+    if (next) {
+      setCurrentQuestion(next.id);
+    } else {
+      await finishConversation(true);
+    }
+  }, [aidaSays, currentQuestion, finishConversation]);
 
   const handleRestart = useCallback(() => {
     sessionRef.current += 1;
@@ -311,6 +338,7 @@ export default function Page() {
                 options={active.options}
                 layout={active.layout}
                 onAnswer={handleAnswer}
+                onSkip={handleSkipQuestion}
               />
             </div>
           )}

@@ -14,6 +14,8 @@ interface QuestionDeckProps {
   helper?: string;
   options: DeckOption[];
   onAnswer: (value: string, label: string) => void;
+  /** When provided, renders a subtle "Skip this question" link below the options. */
+  onSkip?: () => void;
   layout?: "stack" | "grid";
 }
 
@@ -23,6 +25,7 @@ export default function QuestionDeck({
   helper,
   options,
   onAnswer,
+  onSkip,
   layout = "stack",
 }: QuestionDeckProps) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -75,6 +78,17 @@ export default function QuestionDeck({
           </button>
         ))}
       </div>
+      {onSkip && (
+        <div className="mt-3 flex justify-end">
+          <button
+            type="button"
+            onClick={onSkip}
+            className="text-[12.5px] text-ink-soft hover:text-ink transition-colors"
+          >
+            Skip this one
+          </button>
+        </div>
+      )}
     </div>
   );
 }

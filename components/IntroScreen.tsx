@@ -19,13 +19,12 @@ export default function IntroScreen({ onStart }: IntroScreenProps) {
       </header>
 
       <main className="flex-1 flex flex-col justify-center px-5 py-10 max-w-xl mx-auto w-full">
+        <p className="font-serif text-[17px] sm:text-[18px] text-ink-muted mb-2">
+          Hi, I&rsquo;m Aida, the financial expert in your pocket.
+        </p>
         <h1 className="font-serif text-[34px] sm:text-[40px] leading-[1.08] tracking-tight text-ink">
           What&rsquo;s on your mind?
         </h1>
-        <p className="mt-3 text-[17px] leading-relaxed text-ink-muted max-w-md">
-          Tell me where you&rsquo;re stuck and I&rsquo;ll help you figure out
-          what to do next.
-        </p>
 
         <form
           onSubmit={(e) => {
