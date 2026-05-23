@@ -80,9 +80,17 @@ export function selectPath(
 
 export interface TransferAction {
   kind: "transfer";
+  /** Default amount we recommend (also the upper end of the suggested range). */
   amount: number;
   source: string;
   destination: string;
+  /**
+   * Suggested preset amounts to offer the user. When present, the user can
+   * also pick a custom amount. When absent, the amount is treated as fixed.
+   */
+  suggested?: number[];
+  /** Optional hint copy shown next to the picker. */
+  suggestionHint?: string;
 }
 
 export type OptionalAction = TransferAction;
@@ -258,6 +266,8 @@ export function buildResult(
         amount: 100,
         source: `Current account · ${gbp(AVAILABLE_CASH)}`,
         destination: "Emergency Buffer",
+        suggested: [50, 100],
+        suggestionHint: "We suggest £50 to £100 to start. Pick what feels right.",
       },
       educational:
         "Most financial planning starts with a buffer of around 3 to 6 months of essentials. You don't need to get there in one go. Getting started is the part that matters.",
