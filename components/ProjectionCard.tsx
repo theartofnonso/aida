@@ -64,16 +64,23 @@ export default function ProjectionCard({ projection }: ProjectionCardProps) {
           {view.items.map((item, i) => (
             <li
               key={mode + i}
-              className="flex items-baseline gap-4 animate-fade-in-up"
+              className="flex items-start gap-4 animate-fade-in-up"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <span
-                className={
-                  "shrink-0 font-serif text-[22px] leading-none tabular-nums " +
-                  (mode === "loss" ? "text-[#9B1C1C]" : "text-emerald-700")
-                }
-              >
-                {item.amount}
+              <span className="shrink-0 w-[88px] flex flex-col leading-tight">
+                <span
+                  className={
+                    "font-serif text-[24px] tabular-nums leading-none " +
+                    (mode === "loss" ? "text-[#9B1C1C]" : "text-emerald-700")
+                  }
+                >
+                  {item.amount}
+                </span>
+                {item.period && (
+                  <span className="mt-1 text-[12px] text-ink-soft">
+                    {item.period}
+                  </span>
+                )}
               </span>
               <span className="text-[14.5px] text-ink-muted leading-relaxed">
                 {item.detail}

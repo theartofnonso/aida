@@ -88,8 +88,10 @@ export interface TransferAction {
 export type OptionalAction = TransferAction;
 
 export interface ProjectionItem {
-  /** Big number or short tag, e.g. "£128", "£75–£100", "Headroom". */
+  /** Headline figure or short tag, e.g. "£18", "22%", "Direction". */
   amount: string;
+  /** Optional qualifier rendered next to the amount, e.g. "a month", "a year". */
+  period?: string;
   /** Short explanation in plain English. */
   detail: string;
 }
@@ -177,37 +179,41 @@ export function buildResult(
         "Once you've mapped your debts, Aida can help you think about how to sequence repayments alongside saving.",
       projection: {
         loss: {
-          headline: "What 12 months of carrying expensive debt typically costs",
+          headline: "What each £1,000 of expensive debt quietly costs you",
           items: [
             {
-              amount: "£220",
+              amount: "£18",
+              period: "a month",
               detail:
-                "Per £1,000 of credit card balance at ~22% APR, even if the balance doesn't grow.",
+                "Interest that leaves your account every month, while the balance stays exactly the same.",
             },
             {
-              amount: "Compounding",
+              amount: "£220",
+              period: "a year",
               detail:
-                "Interest is charged on interest each month. The longer you wait, the more this quietly builds.",
+                "Add up twelve months of that and it's what each £1,000 of debt costs you to do nothing.",
             },
           ],
         },
         gain: {
-          headline: "What clearing or shrinking that debt buys you",
+          headline: "What each £1,000 paid off gives back",
           items: [
             {
-              amount: "22% return",
+              amount: "£18",
+              period: "a month",
               detail:
-                "Every £1 paid off an expensive debt is the same as earning that rate, risk-free.",
+                "Stops leaving your account the moment that £1,000 is gone.",
             },
             {
-              amount: "Clarity",
+              amount: "22%",
+              period: "return",
               detail:
-                "Mapping every balance often reveals one is smaller than you thought. That win is real.",
+                "Every £1 off your most expensive debt is the same as earning 22% on savings, risk-free.",
             },
           ],
         },
         disclaimer:
-          "Estimates based on typical UK credit card APRs of 20–25%. Your actual interest depends on your terms.",
+          "Based on a typical UK credit card APR of around 22%. Your actual interest depends on your terms.",
       },
     };
   }
@@ -246,10 +252,10 @@ export function buildResult(
       basis,
       numbers,
       nextStep:
-        "Move a starter amount, even £200 to £500, into a separate easy-access savings space, and name it something like 'Emergency Buffer'. Naming it makes it easier to leave alone.",
+        "Move a small starter amount, somewhere between £50 and £100, into a separate easy-access savings space, and name it something like 'Emergency Buffer'. The amount matters less than starting.",
       optionalAction: {
         kind: "transfer",
-        amount: 500,
+        amount: 100,
         source: `Current account · ${gbp(AVAILABLE_CASH)}`,
         destination: "Emergency Buffer",
       },
@@ -260,37 +266,41 @@ export function buildResult(
         "Once your buffer is in place, Aida can help you decide what the rest of this money should do.",
       projection: {
         loss: {
-          headline: "What 12 months without a buffer can cost",
+          headline: "What your £3,200 is quietly losing right now",
           items: [
             {
-              amount: "£75–£100",
+              amount: "£11",
+              period: "a month",
               detail:
-                "A single overdraft slip or credit-card emergency typically costs this in fees and interest over a year.",
+                "Your current account pays around 0%. Inflation is around 4%. That gap is your money losing real value.",
             },
             {
               amount: "£128",
+              period: "a year",
               detail:
-                "What £3,200 sitting in a 0% current account loses to UK inflation at ~4%.",
+                "Twelve months of that drag, without you ever moving the money.",
             },
           ],
         },
         gain: {
-          headline: "What a small buffer earns you over 12 months",
+          headline: "What the same £3,200 could be earning instead",
           items: [
             {
-              amount: "£128",
+              amount: "£11",
+              period: "a month",
               detail:
-                "What £3,200 in an easy-access savings space at ~4% could return in interest.",
+                "An easy-access savings account around 4% turns the drag into a small but real return.",
             },
             {
-              amount: "Headroom",
+              amount: "£128",
+              period: "a year",
               detail:
-                "A £500 surprise stops being a setback. You absorb it without fees or borrowing.",
+                "Same money, same year, opposite direction. That's the swing from doing nothing.",
             },
           ],
         },
         disclaimer:
-          "Estimates based on UK inflation around 3–4% and easy-access savings around 4%. Your numbers will vary.",
+          "Based on UK inflation around 4% and easy-access savings around 4%. Your numbers will vary.",
       },
     };
   }
@@ -323,37 +333,41 @@ export function buildResult(
         "Once it's separated, Aida can help you think about what to do with anything you decide you won't need this year.",
       projection: {
         loss: {
-          headline: "What 12 months of idle money can cost",
+          headline: "What your £3,200 is quietly losing right now",
           items: [
             {
-              amount: "£128",
+              amount: "£11",
+              period: "a month",
               detail:
-                "What £3,200 in a 0% current account loses to UK inflation at ~4%.",
+                "Your current account pays around 0%. Inflation is around 4%. That gap is your money losing real value.",
             },
             {
-              amount: "~£320",
+              amount: "£128",
+              period: "a year",
               detail:
-                "Idle balances commonly leak ~10% into unplanned spending you don't notice.",
+                "Twelve months of that drag. Plus the slow leak into unplanned spending while it's still in your everyday account.",
             },
           ],
         },
         gain: {
-          headline: "What naming and separating this money earns you",
+          headline: "What the same £3,200 could be earning instead",
           items: [
             {
-              amount: "£128",
+              amount: "£11",
+              period: "a month",
               detail:
-                "What £3,200 in easy-access savings at ~4% could return in interest over a year.",
+                "An easy-access savings space around 4% turns the drag into a small but real return.",
             },
             {
-              amount: "Visibility",
+              amount: "£128",
+              period: "a year",
               detail:
-                "Money with a name doesn't disappear into day-to-day spending.",
+                "Same money, same year, opposite direction. The swing from doing nothing.",
             },
           ],
         },
         disclaimer:
-          "Estimates based on UK inflation around 3–4% and easy-access savings around 4%. Your numbers will vary.",
+          "Based on UK inflation around 4% and easy-access savings around 4%. Your numbers will vary.",
       },
     };
   }
@@ -376,37 +390,39 @@ export function buildResult(
       "Once you know the goal, Aida can walk you through the trade-offs to consider, without recommending any specific product or provider.",
     projection: {
       loss: {
-        headline: "What 12 months of indecision typically costs",
+        headline: "What your £3,200 is quietly losing right now",
         items: [
           {
-            amount: "£128",
+            amount: "£11",
+            period: "a month",
             detail:
-              "What £3,200 in a 0% current account loses to UK inflation at ~4%.",
+              "Your current account pays around 0%. Inflation is around 4%. The gap is your money losing real value.",
           },
           {
-            amount: "Momentum",
+            amount: "£128",
+            period: "a year",
             detail:
-              "A year without a clear purpose for this money is a year of opportunity cost. Harder to measure, easy to feel.",
+              "Twelve months of that drag, while the decision waits.",
           },
         ],
       },
       gain: {
-        headline: "What naming a purpose unlocks",
+        headline: "What naming this money's purpose unlocks",
         items: [
           {
             amount: "Direction",
             detail:
-              "Once you know what this money is for, the next decision picks itself.",
+              "Once you know what it's for, picking a place that at least keeps up with inflation gets much easier.",
           },
           {
-            amount: "Confidence",
+            amount: "Action",
             detail:
-              "Specific goals are easier to commit to than vague ones. Commitment is what compounds.",
+              "Specific goals get done. Vague ones get put off. The first step usually picks itself.",
           },
         ],
       },
       disclaimer:
-        "Estimates based on UK inflation around 3–4%. Aida doesn't recommend specific products or providers.",
+        "Based on UK inflation around 4%. Aida doesn't recommend specific products or providers.",
     },
   };
 }
