@@ -88,11 +88,6 @@ export default function IntroScreen({ onStart }: IntroScreenProps) {
             </div>
           </div>
         </form>
-
-        <p className="mt-4 text-[12.5px] text-ink-soft leading-relaxed text-center px-2">
-          Five quick questions. No signup, no jargon, no product
-          recommendations.
-        </p>
       </main>
 
       <footer className="px-5 pb-6 safe-bottom max-w-xl mx-auto w-full">

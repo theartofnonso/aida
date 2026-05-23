@@ -143,7 +143,7 @@ export default function ExecutionPanel({
               onClick={onClose}
               className="mt-2 w-full rounded-2xl py-2.5 text-[14px] text-ink-muted hover:text-ink transition-colors"
             >
-              Actually, not yet
+              I&rsquo;ll do it myself
             </button>
           </div>
         )}

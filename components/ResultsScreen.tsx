@@ -127,31 +127,54 @@ export default function ResultsScreen({
             style={{ animationDelay: "210ms" }}
           >
             {!done ? (
-              <div className="rounded-2xl border border-accent/20 bg-accent/[0.05] p-5">
-                <p className="text-[13px] font-medium uppercase tracking-wider text-accent-soft">
-                  Want to do this together now?
-                </p>
-                <p className="mt-2 text-[15px] leading-relaxed text-ink">
-                  I&rsquo;ll walk you through moving{" "}
+              <div className="rounded-2xl border border-line bg-surface shadow-soft p-5">
+                <p className="text-[14.5px] leading-relaxed text-ink">
+                  Open your bank app, move{" "}
                   <span className="text-accent font-medium">
                     {gbp(transfer.amount)}
                   </span>{" "}
                   to your{" "}
-                  <span className="text-ink">{transfer.destination}</span>{" "}
-                  one step at a time. Nothing actually moves until you
-                  confirm, and you can stop whenever you like.
+                  <span className="text-ink">{transfer.destination}</span>,
+                  then come back here to mark it done.
                 </p>
-                <p className="mt-2 text-[13.5px] leading-relaxed text-ink-muted">
-                  Coming back to this later is usually harder than it
-                  sounds. While the decision still feels clear is the easiest
-                  time.
+
+                <button
+                  type="button"
+                  onClick={() => setDone(true)}
+                  className="mt-4 w-full flex items-center gap-3 rounded-2xl bg-canvas hover:bg-accent/[0.04] active:bg-accent/[0.08] p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="h-5 w-5 rounded border-2 border-accent/50 shrink-0"
+                  />
+                  <span className="text-[15px] font-medium text-ink">
+                    I&rsquo;ve moved the {gbp(transfer.amount)}
+                  </span>
+                </button>
+
+                <div
+                  className="my-5 flex items-center gap-3"
+                  aria-hidden="true"
+                >
+                  <span className="flex-1 h-px bg-line" />
+                  <span className="text-[11px] uppercase tracking-wider text-ink-soft">
+                    or
+                  </span>
+                  <span className="flex-1 h-px bg-line" />
+                </div>
+
+                <p className="text-[13.5px] leading-relaxed text-ink-muted">
+                  You&rsquo;ve already done the hardest part. Five questions,
+                  a real decision. You&rsquo;re at the finish line. The
+                  simplest way to cross it is right here, while the
+                  answer&rsquo;s still in front of you.
                 </p>
                 <button
                   type="button"
                   onClick={() => setExecutionOpen(true)}
-                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-accent text-white py-3 px-5 text-[15px] font-medium shadow-soft hover:bg-accent-soft transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                  className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl border border-accent/30 bg-canvas hover:bg-accent/[0.04] hover:border-accent/50 py-2.5 px-4 text-[14px] font-medium text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                 >
-                  <span>Move {gbp(transfer.amount)} with me</span>
+                  <span>Move {gbp(transfer.amount)} now</span>
                   <span aria-hidden="true">→</span>
                 </button>
               </div>
@@ -165,11 +188,12 @@ export default function ResultsScreen({
                 </span>
                 <div>
                   <p className="text-[14.5px] font-medium text-emerald-900">
-                    Moved {gbp(transfer.amount)} to {transfer.destination}.
+                    Done. {gbp(transfer.amount)} moved to{" "}
+                    {transfer.destination}.
                   </p>
                   <p className="mt-1 text-[13px] text-emerald-800/80 leading-relaxed">
-                    That&rsquo;s the step Aida cared about. The rest is just
-                    repeating it.
+                    Nice work. That&rsquo;s the part of this decision that
+                    actually matters.
                   </p>
                 </div>
               </div>

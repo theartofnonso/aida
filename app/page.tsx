@@ -11,7 +11,6 @@ import TypingIndicator from "@/components/TypingIndicator";
 import {
   buildResult,
   deriveValues,
-  hasAnyAnswers,
   selectPath,
   isAnswersComplete,
   USER_PROMPT,
@@ -122,7 +121,6 @@ export default function Page() {
     null,
   );
   const [answers, setAnswers] = useState<DiagnosticAnswers>({});
-  const [skipped, setSkipped] = useState(false);
 
   // Cancellation token so an in-flight async flow stops if the user restarts.
   const sessionRef = useRef(0);
@@ -160,7 +158,6 @@ export default function Page() {
     const token = sessionRef.current;
     setStage("chat");
     setAnswers({});
-    setSkipped(false);
     setCurrentQuestion(null);
 
     // Replay what the user typed on the intro as their first chat message,
@@ -184,7 +181,6 @@ export default function Page() {
 
   const finishConversation = useCallback(
     async (wasSkipped: boolean) => {
-      setSkipped(wasSkipped);
       setCurrentQuestion(null);
       setStage("thinking");
       await aidaSays(
@@ -234,11 +230,6 @@ export default function Page() {
     [aidaSays, answers, currentQuestion, finishConversation],
   );
 
-  const handleSkip = useCallback(async () => {
-    if (!hasAnyAnswers(answers) && !currentQuestion) return;
-    await finishConversation(true);
-  }, [answers, currentQuestion, finishConversation]);
-
   const handleRestart = useCallback(() => {
     sessionRef.current += 1;
     setStage("intro");
@@ -246,7 +237,6 @@ export default function Page() {
     setAnswers({});
     setCurrentQuestion(null);
     setTyping(false);
-    setSkipped(false);
   }, []);
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -334,19 +324,6 @@ export default function Page() {
         </div>
       </main>
 
-      {stage === "chat" && hasAnyAnswers(answers) && (
-        <div className="safe-bottom px-5 pb-3 pt-2 bg-canvas/95 backdrop-blur border-t border-line/60">
-          <div className="max-w-xl mx-auto w-full flex items-center justify-end">
-            <button
-              type="button"
-              onClick={handleSkip}
-              className="text-[13px] text-ink-muted hover:text-accent transition-colors"
-            >
-              Skip ahead to your priority →
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
