@@ -336,11 +336,7 @@ export default function Page() {
 
       {stage === "chat" && hasAnyAnswers(answers) && (
         <div className="safe-bottom px-5 pb-3 pt-2 bg-canvas/95 backdrop-blur border-t border-line/60">
-          <div className="max-w-xl mx-auto w-full flex items-center justify-between">
-            <p className="text-[12px] text-ink-soft">
-              {Object.values(answers).filter(Boolean).length} of{" "}
-              {QUESTIONS.length} shared
-            </p>
+          <div className="max-w-xl mx-auto w-full flex items-center justify-end">
             <button
               type="button"
               onClick={handleSkip}

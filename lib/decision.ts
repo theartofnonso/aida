@@ -17,6 +17,13 @@ export const ESSENTIALS_MIDPOINT: Record<EssentialsRange, number> = {
   "2000_plus": 2250,
 };
 
+export const ESSENTIALS_LABEL: Record<EssentialsRange, string> = {
+  under_1000: "Under £1,000",
+  "1000_1500": "£1,000 to £1,500",
+  "1500_2000": "£1,500 to £2,000",
+  "2000_plus": "£2,000+",
+};
+
 export interface Derived {
   monthlyEssentials?: number;
   sixWeekBuffer?: number;
@@ -71,25 +78,55 @@ export function selectPath(
   return "longterm";
 }
 
+export interface TransferAction {
+  kind: "transfer";
+  amount: number;
+  source: string;
+  destination: string;
+}
+
+export type OptionalAction = TransferAction;
+
+export interface ProjectionItem {
+  /** Big number or short tag, e.g. "£128", "£75–£100", "Headroom". */
+  amount: string;
+  /** Short explanation in plain English. */
+  detail: string;
+}
+
+export interface ProjectionView {
+  headline: string;
+  items: ProjectionItem[];
+}
+
+export interface Projection {
+  /** Default view. Loss aversion lands harder than gain framing. */
+  loss: ProjectionView;
+  gain: ProjectionView;
+  disclaimer: string;
+}
+
+export interface ResultBasis {
+  /** Short label, e.g. "Your essentials". */
+  label: string;
+  /** Value the user supplied, e.g. "£1,500 to £2,000". */
+  value: string;
+}
+
 export interface ResultContent {
   path: PathId;
   label: string;
   headline: string;
   why: string;
+  /** Inputs that drove the calculations, surfaced near "Your numbers". */
+  basis?: ResultBasis[];
   numbers?: string[];
   nextStep: string;
-  weeklyAction: string;
-  optionalAction?: { label: string; description: string };
+  optionalAction?: OptionalAction;
   educational?: string;
   compliance: string;
   continuity: string;
-  hierarchy: HierarchyItem[];
-}
-
-export type HierarchyState = "done" | "focus" | "later";
-export interface HierarchyItem {
-  label: string;
-  state: HierarchyState;
+  projection: Projection;
 }
 
 const EMOTIONAL_LEAD: Record<EmotionalPriority, string> = {
@@ -133,29 +170,61 @@ export function buildResult(
         "Before saving or investing, it's worth understanding whether any debt is costing you more than your savings could earn. Even a small amount of expensive debt can quietly outpace the gains from a savings pot.",
       nextStep:
         "Write down each debt you have with three things: the balance, the interest rate, and the minimum monthly payment. Then circle the one with the highest interest rate. That's the one to focus on first.",
-      weeklyAction:
-        "Set aside 15 minutes this week to gather your debt details in one place. You don't need to act on them yet. Just see them clearly.",
       educational:
         "Even small overpayments on your most expensive debt can reduce the total interest you pay over time. Clearing it usually beats the return you'd get from saving the same amount.",
       compliance,
       continuity:
         "Once you've mapped your debts, Aida can help you think about how to sequence repayments alongside saving.",
-      hierarchy: [
-        { label: "Spending and debt", state: "focus" },
-        { label: "Emergency safety", state: "later" },
-        { label: "Short-term needs", state: "later" },
-        { label: "Long-term planning", state: "later" },
-      ],
+      projection: {
+        loss: {
+          headline: "What 12 months of carrying expensive debt typically costs",
+          items: [
+            {
+              amount: "£220",
+              detail:
+                "Per £1,000 of credit card balance at ~22% APR, even if the balance doesn't grow.",
+            },
+            {
+              amount: "Compounding",
+              detail:
+                "Interest is charged on interest each month. The longer you wait, the more this quietly builds.",
+            },
+          ],
+        },
+        gain: {
+          headline: "What clearing or shrinking that debt buys you",
+          items: [
+            {
+              amount: "22% return",
+              detail:
+                "Every £1 paid off an expensive debt is the same as earning that rate, risk-free.",
+            },
+            {
+              amount: "Clarity",
+              detail:
+                "Mapping every balance often reveals one is smaller than you thought. That win is real.",
+            },
+          ],
+        },
+        disclaimer:
+          "Estimates based on typical UK credit card APRs of 20–25%. Your actual interest depends on your terms.",
+      },
     };
   }
 
   if (path === "buffer") {
     const monthly = derived.monthlyEssentials;
     const buffer = derived.sixWeekBuffer;
+    const rangeLabel = answers.monthlyEssentials
+      ? ESSENTIALS_LABEL[answers.monthlyEssentials]
+      : null;
     const numbers: string[] = [];
+    const basis: ResultBasis[] | undefined = rangeLabel
+      ? [{ label: "Your monthly essentials", value: rangeLabel }]
+      : undefined;
     if (monthly && buffer) {
       numbers.push(
-        `Six weeks of essentials would be around ${gbp(buffer)} based on the range you picked.`,
+        `Six weeks of essentials would be around ${gbp(buffer)}.`,
       );
       if (derived.bufferMet) {
         numbers.push(
@@ -174,27 +243,55 @@ export function buildResult(
       why:
         (lead ? lead + " " : "") +
         "Before thinking longer term, the priority is making sure you've got enough accessible money for unexpected costs. A small buffer turns a stressful surprise into a manageable one.",
+      basis,
       numbers,
       nextStep:
-        "This week, move a starter amount, even £200 to £500, into a separate easy-access savings space, and name it something like 'Emergency Buffer'. Naming it makes it easier to leave alone.",
-      weeklyAction:
-        "Open a separate savings pot today, before your next pay day, and transfer the starter amount in. That single transfer is the whole win.",
+        "Move a starter amount, even £200 to £500, into a separate easy-access savings space, and name it something like 'Emergency Buffer'. Naming it makes it easier to leave alone.",
       optionalAction: {
-        label: "Mark this as done",
-        description:
-          "Already moved something across? Tap to mark it complete. Momentum compounds.",
+        kind: "transfer",
+        amount: 500,
+        source: `Current account · ${gbp(AVAILABLE_CASH)}`,
+        destination: "Emergency Buffer",
       },
       educational:
-        "Most calm financial planning starts with a buffer of around 3 to 6 months of essentials. You don't need to get there in one go. Getting started is the part that matters.",
+        "Most financial planning starts with a buffer of around 3 to 6 months of essentials. You don't need to get there in one go. Getting started is the part that matters.",
       compliance,
       continuity:
         "Once your buffer is in place, Aida can help you decide what the rest of this money should do.",
-      hierarchy: [
-        { label: "Spending and debt", state: "done" },
-        { label: "Emergency safety", state: "focus" },
-        { label: "Short-term needs", state: "later" },
-        { label: "Long-term planning", state: "later" },
-      ],
+      projection: {
+        loss: {
+          headline: "What 12 months without a buffer can cost",
+          items: [
+            {
+              amount: "£75–£100",
+              detail:
+                "A single overdraft slip or credit-card emergency typically costs this in fees and interest over a year.",
+            },
+            {
+              amount: "£128",
+              detail:
+                "What £3,200 sitting in a 0% current account loses to UK inflation at ~4%.",
+            },
+          ],
+        },
+        gain: {
+          headline: "What a small buffer earns you over 12 months",
+          items: [
+            {
+              amount: "£128",
+              detail:
+                "What £3,200 in an easy-access savings space at ~4% could return in interest.",
+            },
+            {
+              amount: "Headroom",
+              detail:
+                "A £500 surprise stops being a setback. You absorb it without fees or borrowing.",
+            },
+          ],
+        },
+        disclaimer:
+          "Estimates based on UK inflation around 3–4% and easy-access savings around 4%. Your numbers will vary.",
+      },
     };
   }
 
@@ -213,19 +310,51 @@ export function buildResult(
         : undefined,
       nextStep:
         "Move the money out of your everyday current account into a separate savings space so it stops blending into your daily spending. Give it a clear name that matches what it's for.",
-      weeklyAction:
-        "Pick a name for this pot this week. Even something simple like 'Next 12 months' works. Naming it makes the decision feel real.",
+      optionalAction: {
+        kind: "transfer",
+        amount: AVAILABLE_CASH,
+        source: `Current account · ${gbp(AVAILABLE_CASH)}`,
+        destination: "Next 12 months",
+      },
       educational:
         "Separating money mentally and physically, by giving it its own home and label, makes it noticeably easier to protect from accidental spending.",
       compliance,
       continuity:
         "Once it's separated, Aida can help you think about what to do with anything you decide you won't need this year.",
-      hierarchy: [
-        { label: "Spending and debt", state: "done" },
-        { label: "Emergency safety", state: "done" },
-        { label: "Short-term needs", state: "focus" },
-        { label: "Long-term planning", state: "later" },
-      ],
+      projection: {
+        loss: {
+          headline: "What 12 months of idle money can cost",
+          items: [
+            {
+              amount: "£128",
+              detail:
+                "What £3,200 in a 0% current account loses to UK inflation at ~4%.",
+            },
+            {
+              amount: "~£320",
+              detail:
+                "Idle balances commonly leak ~10% into unplanned spending you don't notice.",
+            },
+          ],
+        },
+        gain: {
+          headline: "What naming and separating this money earns you",
+          items: [
+            {
+              amount: "£128",
+              detail:
+                "What £3,200 in easy-access savings at ~4% could return in interest over a year.",
+            },
+            {
+              amount: "Visibility",
+              detail:
+                "Money with a name doesn't disappear into day-to-day spending.",
+            },
+          ],
+        },
+        disclaimer:
+          "Estimates based on UK inflation around 3–4% and easy-access savings around 4%. Your numbers will vary.",
+      },
     };
   }
 
@@ -240,19 +369,45 @@ export function buildResult(
       "Your foundations look more stable, so the next step isn't where to put this money. It's deciding what job you want it to do. Different goals usually call for different levels of risk, flexibility, and time.",
     nextStep:
       "Pick one purpose for this money before deciding anything else: security, flexibility, a home, your future self, or long-term growth. Just one.",
-    weeklyAction:
-      "This week, write a single sentence: 'This money is for ___.' That sentence is the filter every later decision passes through.",
     educational:
       "There's no one 'right' answer here. The clarity you get from naming the goal usually does more work than picking the perfect option ever could.",
     compliance,
     continuity:
       "Once you know the goal, Aida can walk you through the trade-offs to consider, without recommending any specific product or provider.",
-    hierarchy: [
-      { label: "Spending and debt", state: "done" },
-      { label: "Emergency safety", state: "done" },
-      { label: "Short-term needs", state: "done" },
-      { label: "Long-term planning", state: "focus" },
-    ],
+    projection: {
+      loss: {
+        headline: "What 12 months of indecision typically costs",
+        items: [
+          {
+            amount: "£128",
+            detail:
+              "What £3,200 in a 0% current account loses to UK inflation at ~4%.",
+          },
+          {
+            amount: "Momentum",
+            detail:
+              "A year without a clear purpose for this money is a year of opportunity cost. Harder to measure, easy to feel.",
+          },
+        ],
+      },
+      gain: {
+        headline: "What naming a purpose unlocks",
+        items: [
+          {
+            amount: "Direction",
+            detail:
+              "Once you know what this money is for, the next decision picks itself.",
+          },
+          {
+            amount: "Confidence",
+            detail:
+              "Specific goals are easier to commit to than vague ones. Commitment is what compounds.",
+          },
+        ],
+      },
+      disclaimer:
+        "Estimates based on UK inflation around 3–4%. Aida doesn't recommend specific products or providers.",
+    },
   };
 }
 

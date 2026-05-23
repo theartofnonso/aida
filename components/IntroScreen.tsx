@@ -23,8 +23,8 @@ export default function IntroScreen({ onStart }: IntroScreenProps) {
           What&rsquo;s on your mind?
         </h1>
         <p className="mt-3 text-[17px] leading-relaxed text-ink-muted max-w-md">
-          Tell me where you&rsquo;re stuck and I&rsquo;ll help you find one
-          calm next step.
+          Tell me where you&rsquo;re stuck and I&rsquo;ll help you figure out
+          what to do next.
         </p>
 
         <form

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Aida. A calm next step with your money.",
+  title: "Aida. Figure out what to do with your money.",
   description:
     "Aida is an AI financial coach that helps you understand your position, prioritise what matters, and take one confident next step.",
 };
