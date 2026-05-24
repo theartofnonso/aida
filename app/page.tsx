@@ -300,7 +300,7 @@ export default function Page() {
       // otherwise the deterministic transition steps in.
       const llmTransition = await Promise.race([
         transitionPromise.then((r) => r?.transition ?? null),
-        sleep(1500).then(() => null),
+        sleep(2000).then(() => null),
       ]);
       if (sessionRef.current !== token) return;
 
