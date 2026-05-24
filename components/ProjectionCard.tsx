@@ -18,7 +18,7 @@ export default function ProjectionCard({ projection }: ProjectionCardProps) {
     <div className="rounded-2xl border border-line bg-surface shadow-soft overflow-hidden">
       <div className="px-5 pt-5 pb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[12px] font-medium uppercase tracking-wider text-ink-soft">
-          12 months from now
+          {projection.timeframeLabel}
         </p>
         <div
           role="tablist"

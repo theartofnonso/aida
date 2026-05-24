@@ -380,12 +380,14 @@ export default function ResultsScreen({
           </section>
         )}
 
-        <section
-          className="mt-7 animate-fade-in-up"
-          style={{ animationDelay: "360ms" }}
-        >
-          <ProjectionCard projection={result.projection} />
-        </section>
+        {result.projection && (
+          <section
+            className="mt-7 animate-fade-in-up"
+            style={{ animationDelay: "360ms" }}
+          >
+            <ProjectionCard projection={result.projection} />
+          </section>
+        )}
 
         <section
           className="mt-7 animate-fade-in-up"

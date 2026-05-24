@@ -114,6 +114,8 @@ export interface ProjectionView {
 }
 
 export interface Projection {
+  /** Headline eyebrow on the card, e.g. "12 months from now" or "5 years from now". */
+  timeframeLabel: string;
   /** Default view. Loss aversion lands harder than gain framing. */
   loss: ProjectionView;
   gain: ProjectionView;
@@ -145,7 +147,12 @@ export interface ResultContent {
   educational?: string;
   compliance: string;
   continuity: string;
-  projection: Projection;
+  /**
+   * Optional 12-month / 5-year projection card on the results screen.
+   * Omitted on paths where we don't yet have the personal numbers needed
+   * to project honestly (e.g. debt — we don't know her balance or APR).
+   */
+  projection?: Projection;
 }
 
 const EMOTIONAL_LEAD: Record<EmotionalPriority, string> = {
@@ -196,44 +203,10 @@ export function buildResult(
       compliance,
       continuity:
         "Once you've mapped your debts, Aida can help you think about how to sequence repayments alongside saving.",
-      projection: {
-        loss: {
-          headline: "What each £1,000 of expensive debt quietly costs you",
-          items: [
-            {
-              amount: "£18",
-              period: "a month",
-              detail:
-                "Interest that leaves your account every month, while the balance stays exactly the same.",
-            },
-            {
-              amount: "£220",
-              period: "a year",
-              detail:
-                "Add up twelve months of that and it's what each £1,000 of debt costs you to do nothing.",
-            },
-          ],
-        },
-        gain: {
-          headline: "What each £1,000 paid off gives back",
-          items: [
-            {
-              amount: "£18",
-              period: "a month",
-              detail:
-                "Stops leaving your account the moment that £1,000 is gone.",
-            },
-            {
-              amount: "22%",
-              period: "return",
-              detail:
-                "Every £1 off your most expensive debt is the same as earning 22% on savings, risk-free.",
-            },
-          ],
-        },
-        disclaimer:
-          "Based on a typical UK credit card APR of around 22%. Your actual interest depends on your terms.",
-      },
+      // Intentionally no projection: we don't know her balance or APR, so any
+      // £ figure here would be invented. The next step ("map your debts")
+      // is what produces the foundation numbers a future iteration could
+      // project from honestly.
     };
   }
 
@@ -288,37 +261,37 @@ export function buildResult(
       continuity:
         "Once your buffer is in place, Aida can help you decide what the rest of this money should do.",
       projection: {
+        timeframeLabel: "12 months from now",
         loss: {
-          headline: "What your £3,200 is quietly losing right now",
+          headline: "What idle money quietly costs you",
           items: [
             {
               amount: "£11",
               period: "a month",
               detail:
-                "Your current account pays around 0%. Inflation is around 4%. That gap is your money losing real value.",
+                "Your current account pays close to 0%. Inflation is around 4%. Your £3,200 is quietly shrinking by about £11 every month.",
             },
             {
               amount: "£128",
               period: "a year",
               detail:
-                "Twelve months of that drag, without you ever moving the money.",
+                "£3,200 today buys roughly £128 less in twelve months, just from sitting still.",
             },
           ],
         },
         gain: {
-          headline: "What the same £3,200 could be earning instead",
+          headline: "What intentional money preserves",
           items: [
-            {
-              amount: "£11",
-              period: "a month",
-              detail:
-                "An easy-access savings account around 4% turns the drag into a small but real return.",
-            },
             {
               amount: "£128",
               period: "a year",
               detail:
-                "Same money, same year, opposite direction. That's the swing from doing nothing.",
+                "Move it into a place that keeps pace with inflation and the £128 you'd have lost stays yours.",
+            },
+            {
+              amount: "Headroom",
+              detail:
+                "A £500 surprise stops being a setback. You absorb it without fees or borrowing.",
             },
           ],
         },
@@ -356,44 +329,11 @@ export function buildResult(
       compliance,
       continuity:
         "Once it's separated, Aida can help you think about what to do with anything you decide you won't need this year.",
-      projection: {
-        loss: {
-          headline: "What your £3,200 is quietly losing right now",
-          items: [
-            {
-              amount: "£11",
-              period: "a month",
-              detail:
-                "Your current account pays around 0%. Inflation is around 4%. That gap is your money losing real value.",
-            },
-            {
-              amount: "£128",
-              period: "a year",
-              detail:
-                "Twelve months of that drag. Plus the slow leak into unplanned spending while it's still in your everyday account.",
-            },
-          ],
-        },
-        gain: {
-          headline: "What the same £3,200 could be earning instead",
-          items: [
-            {
-              amount: "£11",
-              period: "a month",
-              detail:
-                "An easy-access savings space around 4% turns the drag into a small but real return.",
-            },
-            {
-              amount: "£128",
-              period: "a year",
-              detail:
-                "Same money, same year, opposite direction. The swing from doing nothing.",
-            },
-          ],
-        },
-        disclaimer:
-          "Based on UK inflation around 4% and easy-access savings around 4%. Your numbers will vary.",
-      },
+      // Intentionally no projection: this path is about organisation and
+      // protection from accidental spending, not return-seeking growth.
+      // A 12-month projection frames the decision as if she's holding the
+      // money for the full year, which competes with her own "might need
+      // it soon" timeline.
     };
   }
 
@@ -416,35 +356,39 @@ export function buildResult(
     continuity:
       "Once you know the goal, Aida can walk you through the trade-offs to consider, without recommending any specific product or provider.",
     projection: {
+      // Long-term decisions deserve a long-term frame. 12 months undersells
+      // the case; 5 years matches the actual horizon she's considering.
+      timeframeLabel: "5 years from now",
       loss: {
-        headline: "What your £3,200 is quietly losing right now",
+        headline: "What idle money quietly costs you",
         items: [
           {
             amount: "£11",
             period: "a month",
             detail:
-              "Your current account pays around 0%. Inflation is around 4%. The gap is your money losing real value.",
+              "Your current account pays close to 0%. Inflation is around 4%. Your £3,200 is quietly shrinking by about £11 every month.",
           },
           {
-            amount: "£128",
-            period: "a year",
+            amount: "£640",
+            period: "over 5 years",
             detail:
-              "Twelve months of that drag, while the decision waits.",
+              "£3,200 today buys roughly £640 less in five years, just from doing nothing. Real purchasing power gone.",
           },
         ],
       },
       gain: {
-        headline: "What naming this money's purpose unlocks",
+        headline: "What intentional money preserves",
         items: [
+          {
+            amount: "£640",
+            period: "over 5 years",
+            detail:
+              "Move it into a place that keeps pace with inflation and the £640 you'd have lost over five years stays yours.",
+          },
           {
             amount: "Direction",
             detail:
-              "Once you know what it's for, picking a place that at least keeps up with inflation gets much easier.",
-          },
-          {
-            amount: "Action",
-            detail:
-              "Specific goals get done. Vague ones get put off. The first step usually picks itself.",
+              "Once you know what this money is for, the next decision about where it goes picks itself.",
           },
         ],
       },
