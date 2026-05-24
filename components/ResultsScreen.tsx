@@ -332,7 +332,7 @@ export default function ResultsScreen({
                   onClick={() => setExecutionOpen(true)}
                   className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl border border-accent/30 bg-canvas hover:bg-accent/[0.04] hover:border-accent/50 py-2.5 px-4 text-[14px] font-medium text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                 >
-                  <span>Move {gbp(chosenAmount)} now</span>
+                  <span>Move {gbp(chosenAmount)} right here</span>
                   <span aria-hidden="true">→</span>
                 </button>
               </div>
