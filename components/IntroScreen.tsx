@@ -14,11 +14,12 @@ export default function IntroScreen({ onStart }: IntroScreenProps) {
       </header>
 
       <main className="flex-1 flex flex-col justify-center px-5 py-10 max-w-xl mx-auto w-full">
-        <p className="font-serif text-[17px] sm:text-[18px] text-ink-muted mb-2">
-          Hi, I&rsquo;m Aida, the financial expert in your pocket.
-        </p>
-        <h1 className="font-serif text-[34px] sm:text-[40px] leading-[1.08] tracking-tight text-ink">
-          What&rsquo;s on your mind?
+        <h1 className="font-serif text-[26px] sm:text-[32px] leading-snug tracking-tight text-ink">
+          Hi, I&rsquo;m
+          <AidaWordmark
+            width={104}
+            className="align-middle text-accent ml-[-22px] mr-[-32px]"
+          />, the financial expert in your pocket.
         </h1>
 
         <form

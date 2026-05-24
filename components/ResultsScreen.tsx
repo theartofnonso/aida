@@ -296,7 +296,7 @@ export default function ResultsScreen({
               <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 flex items-start gap-3">
                 <span
                   aria-hidden="true"
-                  className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-white text-[13px]"
+                  className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white text-[13px] leading-none"
                 >
                   ✓
                 </span>

@@ -16,14 +16,14 @@ export default function ProjectionCard({ projection }: ProjectionCardProps) {
 
   return (
     <div className="rounded-2xl border border-line bg-surface shadow-soft overflow-hidden">
-      <div className="px-5 pt-5 pb-3 flex items-center justify-between gap-3">
+      <div className="px-5 pt-5 pb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[12px] font-medium uppercase tracking-wider text-ink-soft">
           12 months from now
         </p>
         <div
           role="tablist"
           aria-label="Projection framing"
-          className="inline-flex rounded-full bg-canvas border border-line p-0.5"
+          className="inline-flex shrink-0 self-start sm:self-auto rounded-full bg-canvas border border-line p-0.5"
         >
           <button
             role="tab"
@@ -31,7 +31,7 @@ export default function ProjectionCard({ projection }: ProjectionCardProps) {
             type="button"
             onClick={() => setMode("loss")}
             className={
-              "px-3 py-1 text-[12.5px] rounded-full transition-colors " +
+              "px-3 py-1 text-[12.5px] whitespace-nowrap rounded-full transition-colors " +
               (mode === "loss"
                 ? "bg-accent text-white"
                 : "text-ink-muted hover:text-ink")
@@ -45,7 +45,7 @@ export default function ProjectionCard({ projection }: ProjectionCardProps) {
             type="button"
             onClick={() => setMode("gain")}
             className={
-              "px-3 py-1 text-[12.5px] rounded-full transition-colors " +
+              "px-3 py-1 text-[12.5px] whitespace-nowrap rounded-full transition-colors " +
               (mode === "gain"
                 ? "bg-accent text-white"
                 : "text-ink-muted hover:text-ink")
