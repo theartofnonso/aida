@@ -10,7 +10,8 @@ export interface DeckOption {
 
 interface QuestionDeckProps {
   question: QuestionId;
-  prompt: string;
+  /** Optional clarifying text for the options. The question prompt itself
+   * lives in the chat bubble above for an audit trail, so we don't repeat it. */
   helper?: string;
   options: DeckOption[];
   onAnswer: (value: string, label: string) => void;
@@ -21,7 +22,6 @@ interface QuestionDeckProps {
 
 export default function QuestionDeck({
   question,
-  prompt,
   helper,
   options,
   onAnswer,
@@ -43,17 +43,14 @@ export default function QuestionDeck({
       <div className="text-xs font-medium uppercase tracking-wider text-ink-soft mb-2">
         Your turn
       </div>
-      <p className="text-[16px] sm:text-[17px] font-medium text-ink leading-snug">
-        {prompt}
-      </p>
       {helper && (
-        <p className="mt-1.5 text-[13.5px] text-ink-muted leading-relaxed">
+        <p className="text-[13.5px] text-ink-muted leading-relaxed">
           {helper}
         </p>
       )}
       <div
         className={
-          "mt-4 " +
+          (helper ? "mt-4 " : "mt-1 ") +
           (layout === "grid"
             ? "grid grid-cols-2 gap-2"
             : "flex flex-col gap-2")

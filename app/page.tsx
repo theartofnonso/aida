@@ -159,6 +159,36 @@ export default function Page() {
     [],
   );
 
+  /**
+   * Append an Aida bubble without the typing indicator. Used inline after a
+   * typing block we already managed (e.g. transition handlers).
+   */
+  const pushAidaBubble = useCallback((text: string) => {
+    setMessages((m) => [...m, { id: uid(), from: "aida", text }]);
+  }, []);
+
+  /**
+   * Push the question prompt as an Aida bubble before the options deck
+   * appears. Keeps the chat transcript auditable — every Q + A is in the
+   * history, not just the answer. Brief typing pause for natural pacing.
+   */
+  const askQuestion = useCallback(
+    async (questionId: QuestionId): Promise<boolean> => {
+      const token = sessionRef.current;
+      const cfg = QUESTION_BY_ID[questionId];
+      setTyping(true);
+      await sleep(450);
+      if (sessionRef.current !== token) return false;
+      setTyping(false);
+      pushAidaBubble(cfg.prompt);
+      await sleep(180);
+      if (sessionRef.current !== token) return false;
+      setCurrentQuestion(questionId);
+      return true;
+    },
+    [pushAidaBubble],
+  );
+
   const startChat = useCallback(async () => {
     sessionRef.current += 1;
     const token = sessionRef.current;
@@ -182,16 +212,8 @@ export default function Page() {
       1000,
     );
     if (sessionRef.current !== token) return;
-    setCurrentQuestion("debt");
-  }, [aidaSays]);
-
-  /**
-   * Aida "speaks" with a typing indicator. Used for the cold-scripted intro;
-   * the chat transitions race LLM output against this same shape inline.
-   */
-  const pushAidaBubble = useCallback((text: string) => {
-    setMessages((m) => [...m, { id: uid(), from: "aida", text }]);
-  }, []);
+    await askQuestion("debt");
+  }, [aidaSays, askQuestion]);
 
   const finishConversation = useCallback(
     async (finalAnswers: DiagnosticAnswers, wasSkipped: boolean) => {
@@ -293,12 +315,12 @@ export default function Page() {
       if (sessionRef.current !== token) return;
 
       if (next) {
-        setCurrentQuestion(next.id);
+        await askQuestion(next.id);
       } else {
         await finishConversation(updated, false);
       }
     },
-    [answers, currentQuestion, finishConversation, pushAidaBubble],
+    [answers, askQuestion, currentQuestion, finishConversation, pushAidaBubble],
   );
 
   const handleSkipQuestion = useCallback(async () => {
@@ -346,11 +368,11 @@ export default function Page() {
     if (sessionRef.current !== token) return;
 
     if (next) {
-      setCurrentQuestion(next.id);
+      await askQuestion(next.id);
     } else {
       await finishConversation(answers, true);
     }
-  }, [answers, currentQuestion, finishConversation, pushAidaBubble]);
+  }, [answers, askQuestion, currentQuestion, finishConversation, pushAidaBubble]);
 
   const handleRestart = useCallback(() => {
     sessionRef.current += 1;
@@ -427,7 +449,6 @@ export default function Page() {
             <div className="pt-2">
               <QuestionDeck
                 question={active.id}
-                prompt={active.prompt}
                 helper={active.helper}
                 options={active.options}
                 layout={active.layout}
