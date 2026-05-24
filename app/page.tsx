@@ -9,12 +9,15 @@ import QuestionDeck, { DeckOption } from "@/components/QuestionDeck";
 import ResultsScreen from "@/components/ResultsScreen";
 import TypingIndicator from "@/components/TypingIndicator";
 import {
+  AVAILABLE_CASH,
   buildResult,
   deriveValues,
   selectPath,
   isAnswersComplete,
   USER_PROMPT,
 } from "@/lib/decision";
+import { buildCoachBrief, type CoachCopy } from "@/lib/coach";
+import { fetchCoachCopy, fetchTransition } from "@/lib/llm-client";
 import type { DiagnosticAnswers, QuestionId } from "@/lib/types";
 
 type Stage = "intro" | "chat" | "thinking" | "results";
@@ -121,6 +124,9 @@ export default function Page() {
     null,
   );
   const [answers, setAnswers] = useState<DiagnosticAnswers>({});
+  // LLM-generated copy for the results screen. Null = fall back to the
+  // deterministic copy in lib/decision.ts.
+  const [aiCopy, setAiCopy] = useState<CoachCopy | null>(null);
 
   // Cancellation token so an in-flight async flow stops if the user restarts.
   const sessionRef = useRef(0);
@@ -179,20 +185,61 @@ export default function Page() {
     setCurrentQuestion("debt");
   }, [aidaSays]);
 
+  /**
+   * Aida "speaks" with a typing indicator. Used for the cold-scripted intro;
+   * the chat transitions race LLM output against this same shape inline.
+   */
+  const pushAidaBubble = useCallback((text: string) => {
+    setMessages((m) => [...m, { id: uid(), from: "aida", text }]);
+  }, []);
+
   const finishConversation = useCallback(
-    async (wasSkipped: boolean) => {
+    async (finalAnswers: DiagnosticAnswers, wasSkipped: boolean) => {
+      const token = sessionRef.current;
       setCurrentQuestion(null);
       setStage("thinking");
-      await aidaSays(
+
+      // Fire the LLM call immediately so it runs in parallel with the closing
+      // chat message. By the time the user finishes reading "Let me put this
+      // together", the response is usually back.
+      const derived = deriveValues(finalAnswers);
+      const path = selectPath(finalAnswers, derived);
+      const isPartial = !isAnswersComplete(finalAnswers);
+      const brief = buildCoachBrief(
+        finalAnswers,
+        derived,
+        path,
+        isPartial,
+        AVAILABLE_CASH,
+      );
+      const copyPromise = fetchCoachCopy(brief);
+
+      setTyping(true);
+      await sleep(700);
+      if (sessionRef.current !== token) return;
+      setTyping(false);
+      pushAidaBubble(
         wasSkipped
           ? "Got it. I’ll work with what you’ve shared so far."
           : "Thanks. Let me put this together.",
-        700,
       );
-      await sleep(900);
+      await sleep(180);
+      if (sessionRef.current !== token) return;
+
+      // Race LLM against a deadline. Wait at least ~600ms so the transition
+      // doesn't feel abrupt even if the response is instant.
+      const minPause = sleep(600);
+      const copy = await Promise.race([
+        copyPromise,
+        sleep(7000).then(() => null),
+      ]);
+      await minPause;
+      if (sessionRef.current !== token) return;
+
+      setAiCopy(copy);
       setStage("results");
     },
-    [aidaSays],
+    [pushAidaBubble],
   );
 
   const handleAnswer = useCallback(
@@ -200,6 +247,7 @@ export default function Page() {
       const q = currentQuestion;
       if (!q) return;
       const config = QUESTION_BY_ID[q];
+      const token = sessionRef.current;
 
       // Pause input + record user bubble + persist answer.
       setCurrentQuestion(null);
@@ -210,29 +258,54 @@ export default function Page() {
       };
       setAnswers(updated);
 
-      const token = sessionRef.current;
-      await sleep(280);
-      if (sessionRef.current !== token) return;
-
       const idx = QUESTIONS.findIndex((x) => x.id === q);
       const next = QUESTIONS[idx + 1];
 
-      // Always give the transition message, it's part of the conversational pacing.
-      await aidaSays(config.transition, 900);
+      // Kick the LLM transition off the moment the user answers — it runs
+      // alongside the natural reading pause.
+      const transitionPromise = fetchTransition({
+        questionId: q,
+        questionPrompt: config.prompt,
+        userAnswer: label,
+        questionsRemaining: QUESTIONS.length - 1 - idx,
+      });
+
+      setTyping(true);
+      await sleep(280);
+      if (sessionRef.current !== token) return;
+
+      // Wait for the LLM up to a short budget. If it lands in time, use it;
+      // otherwise the deterministic transition steps in.
+      const llmTransition = await Promise.race([
+        transitionPromise.then((r) => r?.transition ?? null),
+        sleep(1500).then(() => null),
+      ]);
+      if (sessionRef.current !== token) return;
+
+      const transitionText = llmTransition?.trim() || config.transition;
+      // Tiny extra typing breath so the bubble doesn't pop in the moment the
+      // LLM resolves.
+      await sleep(280);
+      if (sessionRef.current !== token) return;
+      setTyping(false);
+      pushAidaBubble(transitionText);
+      await sleep(180);
       if (sessionRef.current !== token) return;
 
       if (next) {
         setCurrentQuestion(next.id);
       } else {
-        await finishConversation(false);
+        await finishConversation(updated, false);
       }
     },
-    [aidaSays, answers, currentQuestion, finishConversation],
+    [answers, currentQuestion, finishConversation, pushAidaBubble],
   );
 
   const handleSkipQuestion = useCallback(async () => {
     const q = currentQuestion;
     if (!q) return;
+    const config = QUESTION_BY_ID[q];
+    const token = sessionRef.current;
 
     // Acknowledge the skip in the chat without forcing an answer.
     setCurrentQuestion(null);
@@ -241,21 +314,43 @@ export default function Page() {
       { id: uid(), from: "user", text: "I’d rather skip this one." },
     ]);
 
-    const token = sessionRef.current;
+    const idx = QUESTIONS.findIndex((x) => x.id === q);
+    const next = QUESTIONS[idx + 1];
+
+    // LLM transition for the skip too — null userAnswer signals the skip.
+    const transitionPromise = fetchTransition({
+      questionId: q,
+      questionPrompt: config.prompt,
+      userAnswer: null,
+      questionsRemaining: QUESTIONS.length - 1 - idx,
+    });
+
+    setTyping(true);
     await sleep(280);
     if (sessionRef.current !== token) return;
 
-    await aidaSays("No problem. I’ll work with what we have.", 700);
+    const llmTransition = await Promise.race([
+      transitionPromise.then((r) => r?.transition ?? null),
+      sleep(1500).then(() => null),
+    ]);
     if (sessionRef.current !== token) return;
 
-    const idx = QUESTIONS.findIndex((x) => x.id === q);
-    const next = QUESTIONS[idx + 1];
+    const transitionText =
+      llmTransition?.trim() || "No problem. I’ll work with what we have.";
+
+    await sleep(220);
+    if (sessionRef.current !== token) return;
+    setTyping(false);
+    pushAidaBubble(transitionText);
+    await sleep(180);
+    if (sessionRef.current !== token) return;
+
     if (next) {
       setCurrentQuestion(next.id);
     } else {
-      await finishConversation(true);
+      await finishConversation(answers, true);
     }
-  }, [aidaSays, currentQuestion, finishConversation]);
+  }, [answers, currentQuestion, finishConversation, pushAidaBubble]);
 
   const handleRestart = useCallback(() => {
     sessionRef.current += 1;
@@ -264,6 +359,7 @@ export default function Page() {
     setAnswers({});
     setCurrentQuestion(null);
     setTyping(false);
+    setAiCopy(null);
   }, []);
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -280,6 +376,7 @@ export default function Page() {
       <ResultsScreen
         result={result}
         isPartial={isPartial}
+        aiCopy={aiCopy}
         onRestart={handleRestart}
       />
     );

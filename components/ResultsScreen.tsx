@@ -4,11 +4,18 @@ import { useState } from "react";
 import AidaWordmark from "./AidaWordmark";
 import ExecutionPanel from "./ExecutionPanel";
 import ProjectionCard from "./ProjectionCard";
+import type { CoachCopy } from "@/lib/coach";
 import type { ResultContent } from "@/lib/decision";
 
 interface ResultsScreenProps {
   result: ResultContent;
   isPartial: boolean;
+  /**
+   * LLM-generated voice overlay for the headline / why / educational /
+   * continuity copy. Null means fall back to the deterministic copy on the
+   * `result` object (the API was unavailable, slow, refused, etc.).
+   */
+  aiCopy: CoachCopy | null;
   onRestart: () => void;
 }
 
@@ -19,8 +26,16 @@ function gbp(n: number) {
 export default function ResultsScreen({
   result,
   isPartial,
+  aiCopy,
   onRestart,
 }: ResultsScreenProps) {
+  // Use LLM copy when present, falling back to the deterministic copy
+  // field-by-field (so a partial response still overlays what it has).
+  const headline = aiCopy?.headline?.trim() || result.headline;
+  const why = aiCopy?.why?.trim() || result.why;
+  const educational =
+    aiCopy?.educational?.trim() ?? result.educational ?? "";
+  const continuity = aiCopy?.continuity?.trim() || result.continuity;
   const [executionOpen, setExecutionOpen] = useState(false);
   const [done, setDone] = useState(false);
   const transfer =
@@ -56,7 +71,7 @@ export default function ResultsScreen({
             {result.label}
           </h1>
           <p className="mt-3 text-[17px] leading-relaxed text-ink-muted">
-            {result.headline}
+            {headline}
           </p>
         </div>
 
@@ -75,7 +90,7 @@ export default function ResultsScreen({
             Why this matters
           </h2>
           <p className="text-[15.5px] leading-relaxed text-ink">
-            {result.why}
+            {why}
           </p>
         </section>
 
@@ -300,7 +315,7 @@ export default function ResultsScreen({
           </section>
         )}
 
-        {result.educational && (
+        {educational && (
           <section
             className="mt-6 animate-fade-in-up"
             style={{ animationDelay: "300ms" }}
@@ -314,7 +329,7 @@ export default function ResultsScreen({
                   ✱
                 </span>
                 <p className="text-[14px] leading-relaxed text-ink-muted">
-                  {result.educational}
+                  {educational}
                 </p>
               </div>
             </div>
@@ -333,7 +348,7 @@ export default function ResultsScreen({
           style={{ animationDelay: "420ms" }}
         >
           <p className="text-[14px] leading-relaxed text-ink-muted italic">
-            {result.continuity}
+            {continuity}
           </p>
         </section>
 
