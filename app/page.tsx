@@ -167,7 +167,7 @@ export default function Page() {
     await sleep(400);
     if (sessionRef.current !== token) return;
     await aidaSays(
-      "Okay, got it. Before I suggest anything with that £3,200, I want to understand a bit about where you stand today.",
+      "Okay, got it. Before we think about what to do with the £3,200, I want to understand a little about where things stand today.",
       900,
     );
     if (sessionRef.current !== token) return;
