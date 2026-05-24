@@ -53,26 +53,30 @@ export function selectPath(
   answers: DiagnosticAnswers,
   derived: Derived,
 ): PathId {
-  // 1. High-interest debt takes priority over everything.
-  if (answers.hasHighInterestDebt === "yes") return "debt";
+  // Aida's target user is "stuck and scared" (per the brief). When she
+  // skips a question, that is almost never the same signal as a confident
+  // "no" — it's "I don't know", "I'd rather not say", or "I'm avoiding
+  // it". For every Level 1/2 gate below we therefore treat "anything other
+  // than a positive disqualifying answer" as the protective case. The
+  // brief's "order matters" principle: never optimise past a foundation
+  // gate without positive confirmation that it's in place.
 
-  // 2. Emergency buffer — missing/incomplete OR cash coverage below six weeks.
-  const emergencyMissing =
-    answers.emergencySavingsStatus === "no" ||
-    answers.emergencySavingsStatus === "some" ||
-    answers.emergencySavingsStatus === "not_sure";
+  // 1. Debt. Only an explicit "no" exempts the user from the debt path.
+  //    "yes", "not_sure", and skip all route to Debt.
+  if (answers.hasHighInterestDebt !== "no") return "debt";
+
+  // 2. Emergency buffer. Only an explicit "yes" proves the foundation is
+  //    in place. Everything else (no / some / not_sure / skip) routes to
+  //    Buffer. Or cash coverage below six weeks of essentials.
+  const emergencyMissing = answers.emergencySavingsStatus !== "yes";
   const lowCoverage =
     derived.cashCoverageWeeks !== undefined && derived.cashCoverageWeeks < 6;
   if (emergencyMissing || lowCoverage) return "buffer";
 
-  // 3. Short-term accessibility — money likely needed within 12 months.
-  // "not_sure" routes conservatively to accessibility.
-  if (
-    answers.needsMoneyWithin12Months === "yes" ||
-    answers.needsMoneyWithin12Months === "not_sure"
-  ) {
-    return "accessibility";
-  }
+  // 3. Short-term accessibility. Only an explicit "no" frees the money
+  //    for longer-term thinking. "yes", "not_sure", and skip all route to
+  //    Accessibility (keep it reachable, just in case).
+  if (answers.needsMoneyWithin12Months !== "no") return "accessibility";
 
   // 4. Longer-term readiness.
   return "longterm";
