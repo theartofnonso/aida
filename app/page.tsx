@@ -427,8 +427,8 @@ export default function Page() {
     : Math.max(0, currentIdx);
 
   return (
-    <div className="min-h-screen flex flex-col bg-canvas">
-      <header className="safe-top px-5 pt-4 pb-3 border-b border-line/70 bg-canvas/95 backdrop-blur sticky top-0 z-10">
+    <div className="h-dvh flex flex-col bg-canvas">
+      <header className="safe-top px-5 pt-4 pb-3 border-b border-line/70 bg-canvas/95 backdrop-blur z-10 shrink-0">
         <div className="max-w-xl mx-auto w-full flex items-center gap-3">
           <button
             type="button"
@@ -496,7 +496,7 @@ export default function Page() {
        * the +/send buttons are intentional no-ops — free-form messaging
        * isn't wired up for this MVP. Submit via Enter is also a no-op.
        */}
-      <footer className="safe-bottom px-4 sm:px-5 pt-2.5 pb-2 bg-canvas/95 backdrop-blur border-t border-line/60">
+      <footer className="safe-bottom px-4 sm:px-5 pt-2.5 pb-2 bg-canvas/95 backdrop-blur border-t border-line/60 shrink-0">
         <div className="max-w-xl mx-auto w-full">
           <form
             onSubmit={(e) => e.preventDefault()}
