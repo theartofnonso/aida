@@ -56,6 +56,12 @@ export interface CoachCopy {
   educational: string;
   /** 1 sentence about what comes next after they act. */
   continuity: string;
+  /**
+   * Short summary written for the in-chat Aida bubble that wraps the
+   * diagnostic. 2–3 sentences, ~60 words. Includes the priority in plain
+   * English, one sentence why, and the recommended next action.
+   */
+  chatSummary: string;
 }
 
 // ── TransitionBrief: what the LLM sees for chat transitions ────────────────
@@ -101,8 +107,13 @@ export const COACH_OUTPUT_SCHEMA = {
       description:
         "1 sentence about what Aida can help with after they act on this.",
     },
+    chatSummary: {
+      type: "string",
+      description:
+        "Short summary written for an in-chat Aida bubble that closes out the diagnostic. 2 to 3 sentences (max 60 words). Lead with the priority in plain English, then one sentence why, then one sentence on the recommended next action. Conversational, no preamble, no markdown.",
+    },
   },
-  required: ["headline", "why", "educational", "continuity"],
+  required: ["headline", "why", "educational", "continuity", "chatSummary"],
   additionalProperties: false,
 } as const;
 

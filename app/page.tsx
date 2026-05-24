@@ -20,9 +20,16 @@ import { buildCoachBrief, type CoachCopy } from "@/lib/coach";
 import { fetchCoachCopy, fetchTransition } from "@/lib/llm-client";
 import type { DiagnosticAnswers, QuestionId } from "@/lib/types";
 
-type Stage = "intro" | "chat" | "thinking" | "results";
+type Stage = "intro" | "chat";
 
-type Bubble = { id: string; from: "aida" | "user"; text: string };
+type Bubble = {
+  id: string;
+  from: "aida" | "user";
+  text: string;
+  /** When set to "summary", the bubble renders an embedded "View full
+   *  breakdown" CTA inside it (only valid for Aida bubbles). */
+  kind?: "summary";
+};
 
 interface QuestionConfig {
   id: QuestionId;
@@ -127,6 +134,14 @@ export default function Page() {
   // LLM-generated copy for the results screen. Null = fall back to the
   // deterministic copy in lib/decision.ts.
   const [aiCopy, setAiCopy] = useState<CoachCopy | null>(null);
+  // Diagnostic finished — UI shows the summary bubble + "View full breakdown"
+  // CTA. The user stays inside the chat.
+  const [conversationComplete, setConversationComplete] = useState(false);
+  // Whether the detail overlay is currently visible.
+  const [showResults, setShowResults] = useState(false);
+  // Persistent "I've moved the money" flag. Lifted out of ResultsScreen so it
+  // survives the user closing and reopening the overlay.
+  const [executionDone, setExecutionDone] = useState(false);
 
   // Cancellation token so an in-flight async flow stops if the user restarts.
   const sessionRef = useRef(0);
@@ -161,11 +176,15 @@ export default function Page() {
 
   /**
    * Append an Aida bubble without the typing indicator. Used inline after a
-   * typing block we already managed (e.g. transition handlers).
+   * typing block we already managed (e.g. transition handlers). Pass
+   * kind="summary" to embed the "View full breakdown" CTA in the bubble.
    */
-  const pushAidaBubble = useCallback((text: string) => {
-    setMessages((m) => [...m, { id: uid(), from: "aida", text }]);
-  }, []);
+  const pushAidaBubble = useCallback(
+    (text: string, kind?: "summary") => {
+      setMessages((m) => [...m, { id: uid(), from: "aida", text, kind }]);
+    },
+    [],
+  );
 
   /**
    * Push the question prompt as an Aida bubble before the options deck
@@ -219,7 +238,6 @@ export default function Page() {
     async (finalAnswers: DiagnosticAnswers, wasSkipped: boolean) => {
       const token = sessionRef.current;
       setCurrentQuestion(null);
-      setStage("thinking");
 
       // Fire the LLM call immediately so it runs in parallel with the closing
       // chat message. By the time the user finishes reading "Let me put this
@@ -227,6 +245,7 @@ export default function Page() {
       const derived = deriveValues(finalAnswers);
       const path = selectPath(finalAnswers, derived);
       const isPartial = !isAnswersComplete(finalAnswers);
+      const result = buildResult(finalAnswers, derived, path);
       const brief = buildCoachBrief(
         finalAnswers,
         derived,
@@ -236,21 +255,11 @@ export default function Page() {
       );
       const copyPromise = fetchCoachCopy(brief);
 
+      // The Q5 transition already closes the conversation with "let me put
+      // your priorities together". No need for a second filler bubble —
+      // just show typing while the summary LLM call runs, then land it.
       setTyping(true);
-      await sleep(700);
-      if (sessionRef.current !== token) return;
-      setTyping(false);
-      pushAidaBubble(
-        wasSkipped
-          ? "Got it. I’ll work with what you’ve shared so far."
-          : "Thanks. Let me put this together.",
-      );
-      await sleep(180);
-      if (sessionRef.current !== token) return;
-
-      // Race LLM against a deadline. Wait at least ~600ms so the transition
-      // doesn't feel abrupt even if the response is instant.
-      const minPause = sleep(600);
+      const minPause = sleep(900);
       const copy = await Promise.race([
         copyPromise,
         sleep(7000).then(() => null),
@@ -259,7 +268,20 @@ export default function Page() {
       if (sessionRef.current !== token) return;
 
       setAiCopy(copy);
-      setStage("results");
+      setTyping(false);
+
+      // Silence the "skip-only" graceful copy too — the summary itself
+      // softens its language when isPartial is true.
+      void wasSkipped;
+
+      // Push the priority summary as a single Aida chat bubble. The bubble
+      // itself carries the "View full breakdown" CTA inline — see render.
+      const summaryText = copy?.chatSummary?.trim() || result.chatSummary;
+      pushAidaBubble(summaryText, "summary");
+      await sleep(180);
+      if (sessionRef.current !== token) return;
+
+      setConversationComplete(true);
     },
     [pushAidaBubble],
   );
@@ -382,6 +404,9 @@ export default function Page() {
     setCurrentQuestion(null);
     setTyping(false);
     setAiCopy(null);
+    setConversationComplete(false);
+    setShowResults(false);
+    setExecutionDone(false);
   }, []);
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -389,23 +414,17 @@ export default function Page() {
     return <IntroScreen onStart={startChat} />;
   }
 
-  if (stage === "results") {
-    const derived = deriveValues(answers);
-    const path = selectPath(answers, derived);
-    const result = buildResult(answers, derived, path);
-    const isPartial = !isAnswersComplete(answers);
-    return (
-      <ResultsScreen
-        result={result}
-        isPartial={isPartial}
-        aiCopy={aiCopy}
-        onRestart={handleRestart}
-      />
-    );
-  }
-
-  // chat + thinking share a layout
   const active = currentQuestion ? QUESTION_BY_ID[currentQuestion] : null;
+
+  // Build the result deterministically every render so we always have something
+  // to hand the overlay, even before the LLM responds.
+  const derived = deriveValues(answers);
+  const path = selectPath(answers, derived);
+  const result = buildResult(answers, derived, path);
+  const isPartial = !isAnswersComplete(answers);
+  const dotsCurrent = conversationComplete
+    ? QUESTIONS.length
+    : Math.max(0, currentIdx);
 
   return (
     <div className="min-h-screen flex flex-col bg-canvas">
@@ -420,28 +439,40 @@ export default function Page() {
             <AidaWordmark width={68} />
           </button>
           <div className="ml-auto flex items-center gap-3">
-            <ProgressDots
-              total={QUESTIONS.length}
-              current={
-                stage === "thinking"
-                  ? QUESTIONS.length
-                  : Math.max(0, currentIdx)
-              }
-            />
+            <ProgressDots total={QUESTIONS.length} current={dotsCurrent} />
           </div>
         </div>
       </header>
 
-      <main
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto"
-      >
+      <main ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="max-w-xl mx-auto w-full px-4 sm:px-5 pt-5 pb-8 space-y-3">
-          {messages.map((m) => (
-            <ChatBubble key={m.id} from={m.from}>
-              {m.text}
-            </ChatBubble>
-          ))}
+          {messages.map((m) => {
+            if (m.kind === "summary") {
+              return (
+                <ChatBubble key={m.id} from="aida">
+                  <span className="block">{m.text}</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowResults(true)}
+                    className="mt-2 inline-flex items-center gap-1 text-[14px] font-medium text-accent hover:text-accent-soft underline underline-offset-4 decoration-accent/30 hover:decoration-accent/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                  >
+                    <span>View full breakdown</span>
+                    <span aria-hidden="true">→</span>
+                  </button>
+                  {executionDone && (
+                    <span className="mt-2 block text-[12.5px] text-emerald-700">
+                      ✓ Action marked done.
+                    </span>
+                  )}
+                </ChatBubble>
+              );
+            }
+            return (
+              <ChatBubble key={m.id} from={m.from}>
+                {m.text}
+              </ChatBubble>
+            );
+          })}
 
           {typing && <TypingIndicator />}
 
@@ -457,16 +488,20 @@ export default function Page() {
               />
             </div>
           )}
-
-          {stage === "thinking" && !typing && (
-            <div className="flex items-center gap-2 text-[13.5px] text-ink-muted pl-1">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-              Putting your priority together.
-            </div>
-          )}
         </div>
       </main>
 
+      {showResults && (
+        <ResultsScreen
+          result={result}
+          isPartial={isPartial}
+          aiCopy={aiCopy}
+          done={executionDone}
+          onMarkDone={() => setExecutionDone(true)}
+          onRestart={handleRestart}
+          onClose={() => setShowResults(false)}
+        />
+      )}
     </div>
   );
 }

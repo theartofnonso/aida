@@ -128,6 +128,11 @@ export interface ResultContent {
   label: string;
   headline: string;
   why: string;
+  /**
+   * Short summary written for the in-chat Aida bubble that wraps the
+   * diagnostic. 2–3 sentences. Deterministic fallback when no LLM copy.
+   */
+  chatSummary: string;
   /** Inputs that drove the calculations, surfaced near "Your numbers". */
   basis?: ResultBasis[];
   numbers?: string[];
@@ -178,6 +183,8 @@ export function buildResult(
       why:
         (lead ? lead + " " : "") +
         "Before saving or investing, it's worth knowing whether any debt is costing more than your savings could earn. Expensive debt usually grows faster than savings.",
+      chatSummary:
+        "Your biggest priority right now is understanding what your debt is actually costing you. Until that's mapped, any longer term move is fighting an uphill battle. Your next step is to write down each debt with its balance and interest rate, then circle the most expensive one.",
       nextStep:
         "Write down each debt you have with three things: the balance, the interest rate, and the minimum monthly payment. Then circle the one with the highest interest rate. That's the one to focus on first.",
       educational:
@@ -257,6 +264,8 @@ export function buildResult(
       why:
         (lead ? lead + " " : "") +
         "Before anything longer term, the priority is having enough accessible money for unexpected costs. A small buffer turns a surprise into something manageable.",
+      chatSummary:
+        "Your biggest priority right now is building a first financial buffer. Without one, an unexpected cost is the kind of thing that knocks everything else off course. Your next step is to move a small starter amount, between £50 and £100, into a separate easy-access savings space.",
       basis,
       numbers,
       nextStep:
@@ -323,6 +332,8 @@ export function buildResult(
       why:
         (lead ? lead + " " : "") +
         "Since you may need this money within the year, the priority is keeping it separate, visible, and easy to reach.",
+      chatSummary:
+        "Your biggest priority right now is keeping this money accessible but out of the way. Sitting in your everyday account, it tends to quietly blend into spending. Your next step is to move it into a separate savings space with a clear name.",
       numbers: derived.monthlyEssentials
         ? [
             `Your ${gbp(AVAILABLE_CASH)} gives you a clear short-term cushion alongside the buffer you already have.`,
@@ -391,6 +402,8 @@ export function buildResult(
     why:
       (lead ? lead + " " : "") +
       "Your foundations look stable, so the next step isn't where to put this money. It's deciding what job you want it to do.",
+    chatSummary:
+      "Your basics look steady, so the question now is what this money is for. The right home for it changes a lot depending on the job. Your next step is to pick one purpose: security, flexibility, a home, your future self, or long-term growth.",
     nextStep:
       "Pick one purpose for this money before deciding anything else: security, flexibility, a home, your future self, or long-term growth. Just one.",
     educational:

@@ -16,7 +16,14 @@ interface ResultsScreenProps {
    * `result` object (the API was unavailable, slow, refused, etc.).
    */
   aiCopy: CoachCopy | null;
+  /** Persistent "I've moved the money" state, lifted to the parent so it
+   *  survives the user closing and reopening the overlay. */
+  done: boolean;
+  onMarkDone: () => void;
   onRestart: () => void;
+  /** When provided, renders the screen as a closable overlay. Without it,
+   *  renders as a full standalone page (kept for backward compatibility). */
+  onClose?: () => void;
 }
 
 function gbp(n: number) {
@@ -27,7 +34,10 @@ export default function ResultsScreen({
   result,
   isPartial,
   aiCopy,
+  done,
+  onMarkDone,
   onRestart,
+  onClose,
 }: ResultsScreenProps) {
   // Use LLM copy when present, falling back to the deterministic copy
   // field-by-field (so a partial response still overlays what it has).
@@ -37,14 +47,23 @@ export default function ResultsScreen({
     aiCopy?.educational?.trim() ?? result.educational ?? "";
   const continuity = aiCopy?.continuity?.trim() || result.continuity;
   const [executionOpen, setExecutionOpen] = useState(false);
-  const [done, setDone] = useState(false);
 
-  // The chat scroll-into-view in the previous stage can leave the window
-  // scrolled down. Reset to the top whenever the results screen mounts so
-  // the user always sees "Your priority" first.
+  // Reset window scroll when the overlay opens so the user always sees the
+  // top of the breakdown. Also lock body scroll while overlay is mounted.
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, []);
+    if (!onClose) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
   const transfer =
     result.optionalAction?.kind === "transfer" ? result.optionalAction : null;
 
@@ -63,10 +82,28 @@ export default function ResultsScreen({
     ? { ...transfer, amount: chosenAmount }
     : null;
 
+  // When rendered as an overlay we sit above the chat with our own scroll.
+  // When standalone we lay out as a regular page.
+  const rootClasses = onClose
+    ? "fixed inset-0 z-40 flex flex-col bg-canvas overflow-y-auto animate-fade-in"
+    : "min-h-screen flex flex-col bg-canvas";
+
   return (
-    <div className="min-h-screen flex flex-col bg-canvas">
+    <div className={rootClasses} role={onClose ? "dialog" : undefined} aria-modal={onClose ? true : undefined}>
       <header className="safe-top px-5 pt-5 max-w-xl mx-auto w-full">
-        <AidaWordmark width={76} />
+        <div className="flex items-center justify-between gap-3">
+          <AidaWordmark width={76} />
+          {onClose && (
+            <button
+              type="button"
+              aria-label="Close breakdown"
+              onClick={onClose}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-soft hover:text-ink hover:bg-ink/[0.04] transition-colors text-[20px] leading-none focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+            >
+              &times;
+            </button>
+          )}
+        </div>
       </header>
 
       <main className="flex-1 px-5 pt-6 pb-10 max-w-xl mx-auto w-full">
@@ -261,7 +298,7 @@ export default function ResultsScreen({
 
                 <button
                   type="button"
-                  onClick={() => setDone(true)}
+                  onClick={onMarkDone}
                   className="mt-4 w-full flex items-center gap-3 rounded-2xl bg-canvas hover:bg-accent/[0.04] active:bg-accent/[0.08] p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                 >
                   <span
@@ -385,7 +422,7 @@ export default function ResultsScreen({
           onClose={() => setExecutionOpen(false)}
           onComplete={() => {
             setExecutionOpen(false);
-            setDone(true);
+            onMarkDone();
           }}
         />
       )}
