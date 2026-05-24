@@ -116,9 +116,12 @@ export interface ProjectionView {
 export interface Projection {
   /** Headline eyebrow on the card, e.g. "12 months from now" or "5 years from now". */
   timeframeLabel: string;
-  /** Default view. Loss aversion lands harder than gain framing. */
+  /**
+   * Loss-only projection. We deliberately don't show a "gain" side — loss
+   * aversion is the stronger motivator, and one frame removes a toggle
+   * (and the cognitive load that comes with it).
+   */
   loss: ProjectionView;
-  gain: ProjectionView;
   disclaimer: string;
 }
 
@@ -279,24 +282,8 @@ export function buildResult(
             },
           ],
         },
-        gain: {
-          headline: "What intentional money preserves",
-          items: [
-            {
-              amount: "£128",
-              period: "a year",
-              detail:
-                "Move it into a place that keeps pace with inflation and the £128 you'd have lost stays yours.",
-            },
-            {
-              amount: "Headroom",
-              detail:
-                "A £500 surprise stops being a setback. You absorb it without fees or borrowing.",
-            },
-          ],
-        },
         disclaimer:
-          "Based on UK inflation around 4% and easy-access savings around 4%. Your numbers will vary.",
+          "Based on UK inflation around 4% and a current account paying close to 0%. Your numbers will vary.",
       },
     };
   }
@@ -376,24 +363,8 @@ export function buildResult(
           },
         ],
       },
-      gain: {
-        headline: "What intentional money preserves",
-        items: [
-          {
-            amount: "£640",
-            period: "over 5 years",
-            detail:
-              "Move it into a place that keeps pace with inflation and the £640 you'd have lost over five years stays yours.",
-          },
-          {
-            amount: "Direction",
-            detail:
-              "Once you know what this money is for, the next decision about where it goes picks itself.",
-          },
-        ],
-      },
       disclaimer:
-        "Based on UK inflation around 4%. Aida doesn't recommend specific products or providers.",
+        "Based on UK inflation around 4% and a current account paying close to 0%. Your numbers will vary.",
     },
   };
 }
