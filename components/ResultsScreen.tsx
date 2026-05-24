@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AidaWordmark from "./AidaWordmark";
 import ExecutionPanel from "./ExecutionPanel";
 import ProjectionCard from "./ProjectionCard";
@@ -38,6 +38,13 @@ export default function ResultsScreen({
   const continuity = aiCopy?.continuity?.trim() || result.continuity;
   const [executionOpen, setExecutionOpen] = useState(false);
   const [done, setDone] = useState(false);
+
+  // The chat scroll-into-view in the previous stage can leave the window
+  // scrolled down. Reset to the top whenever the results screen mounts so
+  // the user always sees "Your priority" first.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
   const transfer =
     result.optionalAction?.kind === "transfer" ? result.optionalAction : null;
 

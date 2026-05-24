@@ -89,7 +89,7 @@ export const COACH_OUTPUT_SCHEMA = {
     why: {
       type: "string",
       description:
-        "2 to 3 sentences explaining why this matters. Lead with the user's emotional priority if present. No products. No invented numbers.",
+        "1 or 2 short sentences (max 35 words total) explaining why this matters. Lead with the user's emotional priority if present. Tight, not flowery. No products. No invented numbers.",
     },
     educational: {
       type: "string",

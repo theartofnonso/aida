@@ -177,7 +177,7 @@ export function buildResult(
       headline: "Let's check what your debt is actually costing you.",
       why:
         (lead ? lead + " " : "") +
-        "Before saving or investing, it's worth understanding whether any debt is costing you more than your savings could earn. Even a small amount of expensive debt can quietly outpace the gains from a savings pot.",
+        "Before saving or investing, it's worth knowing whether any debt is costing more than your savings could earn. Expensive debt usually grows faster than savings.",
       nextStep:
         "Write down each debt you have with three things: the balance, the interest rate, and the minimum monthly payment. Then circle the one with the highest interest rate. That's the one to focus on first.",
       educational:
@@ -256,7 +256,7 @@ export function buildResult(
       headline: "Let's give this money a quiet, protected job to do.",
       why:
         (lead ? lead + " " : "") +
-        "Before thinking longer term, the priority is making sure you've got enough accessible money for unexpected costs. A small buffer turns a stressful surprise into a manageable one.",
+        "Before anything longer term, the priority is having enough accessible money for unexpected costs. A small buffer turns a surprise into something manageable.",
       basis,
       numbers,
       nextStep:
@@ -322,7 +322,7 @@ export function buildResult(
       headline: "Let's keep this money close, but out of the way.",
       why:
         (lead ? lead + " " : "") +
-        "Because you may need this money within the next year, the priority is keeping it separate, visible, and easy to reach. Locking it away or putting it at risk would create more stress than it would solve.",
+        "Since you may need this money within the year, the priority is keeping it separate, visible, and easy to reach.",
       numbers: derived.monthlyEssentials
         ? [
             `Your ${gbp(AVAILABLE_CASH)} gives you a clear short-term cushion alongside the buffer you already have.`,
@@ -390,7 +390,7 @@ export function buildResult(
       "Your basics look steady. Now the question is what this money is for.",
     why:
       (lead ? lead + " " : "") +
-      "Your foundations look more stable, so the next step isn't where to put this money. It's deciding what job you want it to do. Different goals usually call for different levels of risk, flexibility, and time.",
+      "Your foundations look stable, so the next step isn't where to put this money. It's deciding what job you want it to do.",
     nextStep:
       "Pick one purpose for this money before deciding anything else: security, flexibility, a home, your future self, or long-term growth. Just one.",
     educational:

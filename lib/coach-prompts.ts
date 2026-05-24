@@ -71,7 +71,7 @@ If isPartial is true, soften certainty throughout. Lead with "Based on what you'
 You return JSON with exactly four string fields:
 
 - headline: 1 sentence, max 14 words, plain. Frames the priority in human terms. NOT the path label itself (the UI shows that separately above). Think of it as the subhead.
-- why: 2 to 3 sentences. Plain English. Tie to their emotional priority if present. Explain why this priority comes first. NEVER invent numbers.
+- why: 1 or 2 short sentences, max 35 words total. Plain English. Tie to their emotional priority if present. Explain why this priority comes first. Tight, not flowery. NEVER invent numbers.
 - educational: 1 short sentence with a gentle educational note. May be empty string ("") if nothing useful to add. NEVER recommend products.
 - continuity: 1 sentence about what Aida can help with once they act on this. Future-looking. NEVER recommend products.
 
@@ -108,7 +108,7 @@ Brief:
 Copy:
 {
   "headline": "Let's give this money a quiet, protected job to do.",
-  "why": "You said wanting to feel more secure is what matters most right now, and a buffer is the thing that buys that feeling. Before this money does anything else, the most useful job it can do is sit somewhere unexpected costs can't catch you off guard. A small starter pot is enough to start.",
+  "why": "You said wanting to feel more secure is what matters most. A buffer is the thing that buys that feeling, and it's the cheapest one to put in place.",
   "educational": "Most financial planning starts with around three to six months of essentials set aside, but you don't need the full amount to feel the difference.",
   "continuity": "Once the buffer is in place, Aida can help you decide what the rest of this money should do."
 }
@@ -140,7 +140,7 @@ Brief:
 Copy:
 {
   "headline": "Let's see what your debt is quietly costing you.",
-  "why": "You said building long term wealth is what you care about most, and the most reliable way to do that is to stop the bleed first. Expensive debt usually grows faster than savings or investments earn. Before any long term move, knowing what each debt costs you tells you which one to put your energy on.",
+  "why": "You said long term wealth matters most. The most reliable way to get there is to stop the bleed first, because expensive debt grows faster than savings earn.",
   "educational": "Even small overpayments on the most expensive debt can knock years and hundreds of pounds off what you end up paying.",
   "continuity": "Once your debts are mapped, Aida can help you think about how to sequence repayments alongside the rest."
 }
@@ -172,7 +172,7 @@ Brief:
 Copy:
 {
   "headline": "Let's give this money a clear home, close but out of the way.",
-  "why": "You mentioned wanting to feel more organised, and the simplest version of that is just giving this money a place that isn't your everyday account. Because you may need it within the next year, locking it away or putting it at risk would create more problems than it solves. Keeping it visible and easy to reach is the right move.",
+  "why": "You said feeling organised matters most. Since you may need this money within the year, the move is to keep it visible and easy to reach, just not in your everyday account.",
   "educational": "Money with a name is much easier to leave alone than money sitting in your current account.",
   "continuity": "Once it's separated, Aida can help you think about anything you decide you won't need in the next year."
 }
@@ -204,7 +204,7 @@ Brief:
 Copy:
 {
   "headline": "Your basics look steady. The question now is what this money is for.",
-  "why": "You weren't sure what felt most important right now, and that's okay. The reason your next step isn't about where to put this money is that the answer changes a lot depending on what you want it to do. Giving it a job first makes every choice after it easier.",
+  "why": "You weren't sure what felt most important, and that's fine. The answer for where this money goes changes a lot depending on its job, so naming the job first makes every later choice easier.",
   "educational": "Naming the goal usually does more work than picking the perfect place to put the money.",
   "continuity": "Once you know what it's for, Aida can walk you through the trade offs to consider."
 }
@@ -236,7 +236,7 @@ Brief:
 Copy:
 {
   "headline": "Based on what you've shared, a buffer looks like the place to start.",
-  "why": "From what we have so far, there isn't an emergency buffer in place yet, and that's the one piece most people benefit from sorting before anything else. A small protected pot is what turns an unexpected cost from a setback into a manageable surprise.",
+  "why": "From what we have so far, there isn't a buffer in place yet, and that's usually the piece worth sorting first. It turns an unexpected cost from a setback into a manageable surprise.",
   "educational": "Even a starter amount in a separate space is meaningfully different from the same money in your everyday account.",
   "continuity": "Once a buffer is in place, Aida can help you think through what comes next when you're ready to share more."
 }
