@@ -172,7 +172,7 @@ export function buildResult(
   path: PathId,
 ): ResultContent {
   const compliance =
-    "Aida offers educational guidance based on what you've shared, not regulated financial advice. We don't recommend specific products, providers, or investments.";
+    "Aida offers educational guidance, not regulated financial advice.";
   const lead = emotionalLead(answers.emotionalPriority);
 
   if (path === "debt") {

@@ -492,19 +492,23 @@ export default function Page() {
       </main>
 
       {/*
-       * Composer dock. Disabled in this MVP — the diagnostic is the only
-       * way to talk to Aida for now — but rendered so the chat interface
-       * feels complete and the seam for free-form chat is visible.
+       * Composer dock. The input is typeable so the chat feels alive, but
+       * the +/send buttons are intentional no-ops — free-form messaging
+       * isn't wired up for this MVP. Submit via Enter is also a no-op.
        */}
-      <footer className="safe-bottom px-4 sm:px-5 pt-2.5 pb-3 bg-canvas/95 backdrop-blur border-t border-line/60">
+      <footer className="safe-bottom px-4 sm:px-5 pt-2.5 pb-2 bg-canvas/95 backdrop-blur border-t border-line/60">
         <div className="max-w-xl mx-auto w-full">
-          <div className="flex items-center gap-1.5 rounded-full bg-surface border border-line pl-1 pr-1.5 py-1 shadow-soft">
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            className="flex items-center gap-1.5 rounded-full bg-surface border border-line pl-1 pr-1.5 py-1 shadow-soft focus-within:border-accent/40 transition-colors"
+          >
             <button
               type="button"
-              aria-label="Add attachment (coming soon)"
-              disabled
-              title="Coming soon"
-              className="inline-flex shrink-0 items-center justify-center h-9 w-9 rounded-full text-ink-soft/60 cursor-not-allowed"
+              aria-label="Add attachment"
+              onClick={() => {
+                /* no-op for MVP */
+              }}
+              className="inline-flex shrink-0 items-center justify-center h-9 w-9 rounded-full text-ink-muted hover:text-accent hover:bg-accent/[0.06] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
             >
               <svg
                 width="18"
@@ -521,17 +525,17 @@ export default function Page() {
             </button>
             <input
               type="text"
-              disabled
               placeholder="Message Aida"
-              aria-label="Message Aida (free-form messaging coming soon)"
-              className="flex-1 min-w-0 bg-transparent border-0 outline-none py-1 text-[15px] text-ink placeholder:text-ink-soft/70 disabled:cursor-not-allowed disabled:placeholder:text-ink-soft/60"
+              aria-label="Message Aida"
+              className="flex-1 min-w-0 bg-transparent border-0 outline-none py-1 text-[15px] text-ink placeholder:text-ink-soft/70"
             />
             <button
-              type="button"
-              aria-label="Send (coming soon)"
-              disabled
-              title="Coming soon"
-              className="inline-flex shrink-0 items-center justify-center h-9 w-9 rounded-full bg-accent/30 text-white/85 cursor-not-allowed"
+              type="submit"
+              aria-label="Send"
+              onClick={() => {
+                /* no-op for MVP */
+              }}
+              className="inline-flex shrink-0 items-center justify-center h-9 w-9 rounded-full bg-accent text-white shadow-soft hover:bg-accent-soft transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
             >
               <svg
                 width="16"
@@ -547,7 +551,10 @@ export default function Page() {
                 <path d="M12 19V5M5 12l7-7 7 7" />
               </svg>
             </button>
-          </div>
+          </form>
+          <p className="mt-2 text-[11px] leading-relaxed text-ink-soft text-center">
+            Aida offers educational guidance, not regulated financial advice.
+          </p>
         </div>
       </footer>
 
