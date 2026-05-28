@@ -8,7 +8,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2B0A3D",
+  // Match the app's canvas colour so the mobile browser chrome and
+  // overscroll-bounce area blend with the page background instead of
+  // showing the accent purple.
+  themeColor: "#FAF8F5",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
